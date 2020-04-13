@@ -650,9 +650,44 @@ function setDocumentScrollTop(ypos)
   </ul> </li> 
  <li>reactive stream 등의 event-driven 형태로 구현하는것을 최종목표로 삼는다</li> 
 </ul> 
+<h1> <a id="참고-코드" class="anchor" href="#%EC%B0%B8%EA%B3%A0-%EC%BD%94%EB%93%9C" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>참고 코드</h1> 
+<ul> 
+ <li>엘라스틱 서치 bulk 라이브러리</li> 
+</ul> 
+<pre><code>// bulk listener 생성
+class BulkProcessorListener implements BulkProcessor.Listener {
+    @Override
+    public void beforeBulk(long executionId, BulkRequest bulkRequest) {
+        log.debug(&quot;beforeBulk, executionId: {}&quot;, executionId);
+    }
+    @Override
+    public void afterBulk(long executionId, BulkRequest bulkRequest, BulkResponse bulkResponse) {
+    		log.debug(&quot;afterBulk , executionId: {}&quot;, executionId);
+    }
+    @Override
+    public void afterBulk(long executionId, BulkRequest bulkRequest, Throwable e) {
+    	log.error(&quot;afterBulk, error, executionId: &quot; + executionId, e);
+    }
+}
+
+// bulk 생성
+BulkProcessorListener bulkProcessorListener = new BulkProcessorListener();
+bulkProcessor = BulkProcessor.builder(clientFactory.getClient(), bulkProcessorListener)
+        .setBulkActions(bulkActionSize)
+        .setBulkSize(new ByteSizeValue(50, ByteSizeUnit.MB))
+        .setConcurrentRequests(1)
+        .setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 10))                
+        .build()
+        ;
+
+// bulk 사용
+bulkProcessor.add(task);
+bulkProcessor.flush();
+</code></pre> 
 <h1> <a id="todo---done" class="anchor" href="#todo---done" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>TODO - done</h1> 
 <ul> 
- <li>프로젝트 세팅</li> 
+ <li>maven 세팅</li> 
+ <li>git 세팅</li> 
 </ul> 
 <h1> <a id="todo" class="anchor" href="#todo" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>TODO</h1> 
 <ul> 

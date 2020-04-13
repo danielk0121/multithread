@@ -6,6 +6,40 @@
 	- lombok, common-lang, common-collection, logback, unit-test 라이브러리 등
 - reactive stream 등의 event-driven 형태로 구현하는것을 최종목표로 삼는다
 
+# 참고 코드
+- 엘라스틱 서치 bulk 라이브러리
+```
+// bulk listener 생성
+class BulkProcessorListener implements BulkProcessor.Listener {
+    @Override
+    public void beforeBulk(long executionId, BulkRequest bulkRequest) {
+        log.debug("beforeBulk, executionId: {}", executionId);
+    }
+    @Override
+    public void afterBulk(long executionId, BulkRequest bulkRequest, BulkResponse bulkResponse) {
+    		log.debug("afterBulk , executionId: {}", executionId);
+    }
+    @Override
+    public void afterBulk(long executionId, BulkRequest bulkRequest, Throwable e) {
+    	log.error("afterBulk, error, executionId: " + executionId, e);
+    }
+}
+
+// bulk 생성
+BulkProcessorListener bulkProcessorListener = new BulkProcessorListener();
+bulkProcessor = BulkProcessor.builder(clientFactory.getClient(), bulkProcessorListener)
+        .setBulkActions(bulkActionSize)
+        .setBulkSize(new ByteSizeValue(50, ByteSizeUnit.MB))
+        .setConcurrentRequests(1)
+        .setBackoffPolicy(BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 10))                
+        .build()
+        ;
+
+// bulk 사용
+bulkProcessor.add(task);
+bulkProcessor.flush();
+```
+
 # TODO - done
 - maven 세팅
 - git 세팅
