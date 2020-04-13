@@ -7,7 +7,8 @@
 - reactive stream 등의 event-driven 형태로 구현하는것을 최종목표로 삼는다
 
 # TODO - done
-- 프로젝트 세팅
+- maven 세팅
+- git 세팅
 
 # TODO
 - task thread pool 기능
